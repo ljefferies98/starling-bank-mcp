@@ -1,0 +1,23 @@
+services:
+  starling-bank-mcp:
+    build: .
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      # Coolify: routes the domain you assign to port 3000
+      - SERVICE_FQDN_STARLINGMCP_3000
+      - MCP_TRANSPORT=http
+      - PORT=3000
+      - STARLING_BANK_ACCESS_TOKEN=${STARLING_BANK_ACCESS_TOKEN:?}
+      # Clients must send `Authorization: Bearer <MCP_AUTH_TOKEN>`. Generate with `openssl rand -hex 32`
+      - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN:?}
+      # Optional: only needed for payment_create, see PAYMENT_SIGNING_SETUP.md
+      - STARLING_BANK_PRIVATE_KEY_UID=${STARLING_BANK_PRIVATE_KEY_UID:-}
+      - STARLING_BANK_PRIVATE_KEY_PEM=${STARLING_BANK_PRIVATE_KEY_PEM:-}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3

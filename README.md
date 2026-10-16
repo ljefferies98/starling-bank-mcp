@@ -32,8 +32,33 @@ STARLING_BANK_ACCESS_TOKEN=eyJhb... MCP_TRANSPORT=http PORT=3000 npx starling-ba
 
 The MCP endpoint will be available at `http://localhost:3000/mcp`.
 
+HTTP mode requires an `MCP_AUTH_TOKEN` (generate one with `openssl rand -hex 32`). Clients must send it as an `Authorization: Bearer <token>` header. If you've secured the server some other way, you can set `MCP_ALLOW_UNAUTHENTICATED=true` instead.
+
 > [!WARNING]
-> The HTTP transport has no authentication. Other processes on your machine—including websites in your browser—could potentially access the endpoint and control your bank account. Only use HTTP transport behind a reverse proxy or in another secured setup.
+> Without `MCP_AUTH_TOKEN`, other processes on your machine (including websites in your browser) could access the endpoint and control your bank account.
+
+## Advanced: Docker / Coolify
+
+The repo includes a `Dockerfile` (HTTP transport on port 3000, with a `/health` endpoint) and a `docker-compose.yaml`.
+
+**Coolify:** create a new resource from this Git repo, then either:
+- choose the **Docker Compose** build pack (recommended). Coolify will prompt for the env vars below. Assign a domain to the `starling-bank-mcp` service.
+- or choose the **Dockerfile** build pack, set the exposed port to `3000` and add the env vars manually.
+
+| Variable | Required | Notes |
+| --- | --- | --- |
+| `STARLING_BANK_ACCESS_TOKEN` | Yes | Personal access token |
+| `MCP_AUTH_TOKEN` | Yes | Bearer token clients must send |
+| `STARLING_BANK_PRIVATE_KEY_UID` | No | For `payment_create`, see [PAYMENT_SIGNING_SETUP.md](./PAYMENT_SIGNING_SETUP.md) |
+| `STARLING_BANK_PRIVATE_KEY_PEM` | No | Multiline, or one line with `\n` escapes |
+
+Then connect a client, for example with Claude Code:
+
+```bash
+claude mcp add --transport http starling https://your-domain.example/mcp --header "Authorization: Bearer <MCP_AUTH_TOKEN>"
+```
+
+Note: claude.ai web custom connectors can't send bearer headers, so they won't work with this setup.
 
 ## Contributing
 

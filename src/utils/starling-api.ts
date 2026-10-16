@@ -4,7 +4,9 @@ import {createHash, createSign} from 'node:crypto';
 export const STARLING_BANK_BASE_URL = process.env.STARLING_BANK_BASE_URL || 'https://api.starlingbank.com';
 
 // ECDSA key information for signing requests
-const {STARLING_BANK_PRIVATE_KEY_PEM, STARLING_BANK_PRIVATE_KEY_UID} = process.env;
+const {STARLING_BANK_PRIVATE_KEY_UID} = process.env;
+// Allow the PEM to be supplied on one line with literal \n escapes (common in hosting UIs)
+const STARLING_BANK_PRIVATE_KEY_PEM = process.env.STARLING_BANK_PRIVATE_KEY_PEM?.replace(/\\n/g, '\n');
 
 // Common helper to create base headers
 function createBaseHeaders(accessToken: string): Record<string, string> {
